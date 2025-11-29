@@ -1,22 +1,23 @@
-﻿using EcoTrack.Api.Data.Context;
+﻿using EcoTrack.Api.Data;
 using EcoTrack.Api.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace EcoTrack.Api.Services
 {
-    public class ReportServices
+    public class ReportService
     {
         private readonly EcoTrackContext _ctx;
         public ReportService(EcoTrackContext ctx) => _ctx = ctx;
 
         public async Task<RelatorioCompliance> GeraRelatorioCompliance(string periodo)
         {
-            // opção 1: chamar procedure PL/SQL no Oracle (exemplo)
-            // opção 2: executar via LINQ (aqui implementação EF)
+            // calcula por mês (formato YYYYMM)
             var totalEmissao = await _ctx.Emissoes
-                .Where(e => e.DataRegistro.ToString("yyyyMM") == periodo)
+                .Where(e => e.DataRegistro.Year.ToString() + e.DataRegistro.Month.ToString("D2") == periodo)
                 .SumAsync(e => (decimal?)e.QtdCo2) ?? 0m;
+
             var totalComp = await _ctx.Compensacoes
-                .Where(c => c.Data.ToString("yyyyMM") == periodo)
+                .Where(c => c.Data.Year.ToString() + c.Data.Month.ToString("D2") == periodo)
                 .SumAsync(c => (decimal?)c.QtdCo2Compensado) ?? 0m;
 
             var rel = new RelatorioCompliance
@@ -27,6 +28,7 @@ namespace EcoTrack.Api.Services
                 Status = totalComp >= totalEmissao ? "CONFORME" : "NÃO CONFORME",
                 DataGeracao = DateTime.UtcNow
             };
+
             _ctx.Relatorios.Add(rel);
             await _ctx.SaveChangesAsync();
             return rel;

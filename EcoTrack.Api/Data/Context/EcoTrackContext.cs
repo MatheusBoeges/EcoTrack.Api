@@ -1,17 +1,16 @@
 ﻿using EcoTrack.Api.Models;
-using System.Collections.Generic;
-using System.Reflection.Emit;
+using Microsoft.EntityFrameworkCore;
 
-namespace EcoTrack.Api.Data.Context
+namespace EcoTrack.Api.Data
 {
     public class EcoTrackContext : DbContext
     {
         public EcoTrackContext(DbContextOptions<EcoTrackContext> opts) : base(opts) { }
 
-        public DbSet<Atividade> Atividades { get; set; }
-        public DbSet<Emissao> Emissoes { get; set; }
-        public DbSet<Compensacao> Compensacoes { get; set; }
-        public DbSet<RelatorioCompliance> Relatorios { get; set; }
+        public DbSet<Atividade> Atividades => Set<Atividade>();
+        public DbSet<Emissao> Emissoes => Set<Emissao>();
+        public DbSet<Compensacao> Compensacoes => Set<Compensacao>();
+        public DbSet<RelatorioCompliance> Relatorios => Set<RelatorioCompliance>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
